@@ -1,17 +1,16 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
 import './App.scss';
 import { useState } from 'react';
+import cn from 'classnames';
 import usersFromServer from './api/users';
 import categoriesFromServer from './api/categories';
 import productsFromServer from './api/products';
 
-import cn from 'classnames';
-
 const products = productsFromServer.map(product => {
   const category = categoriesFromServer.find(
-    category => category.id === product.categoryId,
+    cat => cat.id === product.categoryId,
   );
-  const user = usersFromServer.find(user => user.id === category.ownerId);
+  const user = usersFromServer.find(us => us.id === category.ownerId);
 
   return {
     id: product.id,
@@ -26,12 +25,12 @@ const products = productsFromServer.map(product => {
 });
 
 function getFilteredProducts(
-  products,
+  productsFromData,
   selectedUser,
   searchText,
   selectedCategories,
 ) {
-  return products.filter(product => {
+  return productsFromData.filter(product => {
     if (selectedUser !== 'All' && product.userName !== selectedUser) {
       return false;
     }
@@ -69,12 +68,10 @@ export function App() {
   const toggleCategory = categoryId => {
     if (categoryId === 'all') {
       setChosenCategories([]);
+    } else if (chosenCategories.includes(categoryId)) {
+      setChosenCategories(chosenCategories.filter(id => id !== categoryId));
     } else {
-      if (chosenCategories.includes(categoryId)) {
-        setChosenCategories(chosenCategories.filter(id => id !== categoryId));
-      } else {
-        setChosenCategories([...chosenCategories, categoryId]);
-      }
+      setChosenCategories([...chosenCategories, categoryId]);
     }
   };
 
@@ -97,9 +94,9 @@ export function App() {
                 <a
                   key={user.name}
                   href="#/"
-                  {...(user.name === 'All'
-                    ? { 'data-cy': 'FilterAllUsers' }
-                    : { 'data-cy': 'FilterUser' })}
+                  data-cy={
+                    user.name === 'All' ? 'FilterAllUsers' : 'FilterUser'
+                  }
                   onClick={() => {
                     setCheckedUserTop(user.name);
                   }}
